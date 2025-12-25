@@ -15,7 +15,740 @@ Bu belge, WPA2-Hunter projesindeki tüm scriptlerin detaylı açıklamasını i�
 
 ---
 
-## 🔄 Genel İş Akışı
+## � Komut Referansı - Tüm Komutların Detaylı Açıklaması
+
+Bu bölümde scriptlerde kullanılan **tüm komutlar** alfabetik sırayla açıklanmıştır.
+
+---
+
+### 📦 Aircrack-ng Suite Komutları
+
+Aircrack-ng, WiFi ağ güvenliği test araçları paketidir.
+
+#### `aircrack-ng` - Parola Kırma Aracı
+WPA/WPA2 handshake dosyalarından parola kırmak için kullanılır.
+
+```bash
+aircrack-ng [seçenekler] <dosya.cap>
+```
+
+| Parametre | Açıklama | Örnek |
+|-----------|----------|-------|
+| `-w <wordlist>` | Parola listesi dosyası | `-w rockyou.txt` |
+| `-b <BSSID>` | Hedef AP'nin MAC adresi | `-b AA:BB:CC:DD:EE:FF` |
+| `-e <ESSID>` | Hedef ağ adı | `-e "MyNetwork"` |
+| `-l <dosya>` | Bulunan parolayı dosyaya yaz | `-l found.txt` |
+
+**Nasıl Çalışır:**
+1. Wordlist'teki her parolayı al
+2. PBKDF2-SHA1 ile PMK (Pairwise Master Key) hesapla
+3. PMK ile handshake'i doğrula
+4. Eşleşirse parola bulunmuştur
+
+**Örnek Kullanım:**
+```bash
+# Basit kullanım
+aircrack-ng -w /usr/share/wordlists/rockyou.txt capture-01.cap
+
+# BSSID belirterek
+aircrack-ng -w rockyou.txt -b AA:BB:CC:DD:EE:FF capture-01.cap
+
+# Handshake kontrolü (kırma yapmadan)
+aircrack-ng capture-01.cap
+```
+
+---
+
+#### `airodump-ng` - Paket Yakalama ve Ağ Tarama Aracı
+Havadaki WiFi paketlerini yakalar ve ağları listeler.
+
+```bash
+airodump-ng [seçenekler] <interface>
+```
+
+| Parametre | Açıklama | Örnek |
+|-----------|----------|-------|
+| `-c <kanal>` | Belirli kanala odaklan | `-c 6` |
+| `--bssid <MAC>` | Belirli AP'ye odaklan | `--bssid AA:BB:CC:DD:EE:FF` |
+| `-w <prefix>` | Çıktı dosya adı prefixi | `-w capture` |
+| `--output-format` | CSV, PCAP vb. format | `--output-format csv` |
+| `--write-interval` | Yazma aralığı (saniye) | `--write-interval 1` |
+
+**Ekran Çıktısı Alanları:**
+| Alan | Açıklama |
+|------|----------|
+| `BSSID` | AP'nin MAC adresi |
+| `PWR` | Sinyal gücü (dBm, 0'a yakın = güçlü) |
+| `Beacons` | Yakalanan beacon frame sayısı |
+| `#Data` | Yakalanan veri paketi sayısı |
+| `CH` | Kanal numarası |
+| `ENC` | Şifreleme (WPA2, WPA, WEP, OPN) |
+| `CIPHER` | Şifre algoritması (CCMP, TKIP) |
+| `AUTH` | Kimlik doğrulama (PSK, MGT) |
+| `ESSID` | Ağ adı |
+
+**Örnek Kullanım:**
+```bash
+# Tüm ağları tara
+airodump-ng wlan0mon
+
+# Belirli kanala odaklan
+airodump-ng -c 6 wlan0mon
+
+# Belirli AP'den handshake yakala
+airodump-ng -c 6 --bssid AA:BB:CC:DD:EE:FF -w capture wlan0mon
+```
+
+---
+
+#### `aireplay-ng` - Paket Enjeksiyon Aracı
+Sahte paketler göndererek saldırı gerçekleştirir.
+
+```bash
+aireplay-ng [saldırı_tipi] [seçenekler] <interface>
+```
+
+| Saldırı Tipi | Numara | Açıklama |
+|--------------|--------|----------|
+| `--deauth` | 0 | Deauthentication saldırısı |
+| `--fakeauth` | 1 | Sahte kimlik doğrulama |
+| `--interactive` | 2 | Etkileşimli paket seçimi |
+| `--arpreplay` | 3 | ARP tekrar saldırısı |
+| `--chopchop` | 4 | ChopChop saldırısı |
+| `--fragment` | 5 | Fragmentation saldırısı |
+
+| Parametre | Açıklama | Örnek |
+|-----------|----------|-------|
+| `-a <BSSID>` | Access Point MAC | `-a AA:BB:CC:DD:EE:FF` |
+| `-c <MAC>` | İstemci MAC | `-c 11:22:33:44:55:66` |
+| `-e <ESSID>` | Ağ adı | `-e "TargetNetwork"` |
+| `--deauth <sayı>` | Gönderilelecek deauth paketi | `--deauth 10` |
+
+**Deauth Saldırısı Nasıl Çalışır:**
+```
+┌─────────────┐                           ┌─────────────┐
+│  Saldırgan  │                           │  İstemci    │
+│  (aireplay) │                           │  (Kurban)   │
+└──────┬──────┘                           └──────┬──────┘
+       │                                         │
+       │  Sahte Deauth Frame                     │
+       │  (AP'den geliyormuş gibi)               │
+       │────────────────────────────────────────►│
+       │                                         │
+       │                                   ┌─────┴─────┐
+       │                                   │ Bağlantı  │
+       │                                   │ Kesiliyor │
+       │                                   └─────┬─────┘
+       │                                         │
+       │                                   ┌─────┴─────┐
+       │                                   │ Yeniden   │
+       │                                   │ Bağlanma  │
+       │                                   │ (4-Way    │
+       │                                   │ Handshake)│
+       │                                   └───────────┘
+```
+
+**Örnek Kullanım:**
+```bash
+# Tüm istemcilere 5 deauth paketi gönder
+aireplay-ng --deauth 5 -a AA:BB:CC:DD:EE:FF wlan0mon
+
+# Belirli istemciye 10 deauth paketi gönder
+aireplay-ng --deauth 10 -a AA:BB:CC:DD:EE:FF -c 11:22:33:44:55:66 wlan0mon
+
+# Sürekli deauth (0 = sonsuz)
+aireplay-ng --deauth 0 -a AA:BB:CC:DD:EE:FF wlan0mon
+```
+
+---
+
+#### `airmon-ng` - Monitor Mode Yönetimi
+WiFi adaptörünü monitor moduna alır veya çıkarır.
+
+```bash
+airmon-ng [komut] [interface]
+```
+
+| Komut | Açıklama |
+|-------|----------|
+| (boş) | Mevcut wireless interface'leri listele |
+| `check` | Engelleyici processleri listele |
+| `check kill` | Engelleyici processleri durdur |
+| `start <iface>` | Monitor mode'u başlat |
+| `stop <iface>` | Monitor mode'u durdur |
+
+**Monitor Mode vs Managed Mode:**
+| Özellik | Managed Mode | Monitor Mode |
+|---------|--------------|--------------|
+| Paket alımı | Sadece kendine gelen | Tüm havadaki paketler |
+| İnternet | Var | Yok |
+| Interface adı | wlan0 | wlan0mon |
+| Kullanım | Normal internet | Paket yakalama |
+
+**Örnek Kullanım:**
+```bash
+# Interface'leri listele
+airmon-ng
+
+# Engelleyici süreçleri durdur
+airmon-ng check kill
+
+# Monitor mode başlat
+airmon-ng start wlan0
+# Sonuç: wlan0 → wlan0mon
+
+# Monitor mode durdur
+airmon-ng stop wlan0mon
+```
+
+---
+
+### 🔨 Hashcat ve Yardımcı Araçlar
+
+#### `hashcat` - GPU Tabanlı Parola Kırma
+En hızlı parola kırma aracı, GPU kullanır.
+
+```bash
+hashcat [seçenekler] <hash_dosyası> [wordlist]
+```
+
+| Parametre | Açıklama | Örnek |
+|-----------|----------|-------|
+| `-m <mode>` | Hash tipi | `-m 22000` (WPA2) |
+| `-a <saldırı>` | Saldırı modu | `-a 0` (dictionary) |
+| `-o <dosya>` | Çıktı dosyası | `-o cracked.txt` |
+| `--show` | Kırılmış hashleri göster | `--show` |
+| `--status` | Durum göster | `--status` |
+| `-w <seviye>` | İş yükü profili (1-4) | `-w 3` |
+
+**Hash Modları:**
+| Mode | Hash Tipi |
+|------|-----------|
+| 22000 | WPA-PBKDF2-PMKID+EAPOL (yeni format) |
+| 2500 | WPA-EAPOL-PBKDF2 (eski format) |
+| 0 | MD5 |
+| 100 | SHA1 |
+| 1000 | NTLM |
+
+**Saldırı Modları:**
+| Mode | Tip | Açıklama |
+|------|-----|----------|
+| 0 | Dictionary | Wordlist'ten dene |
+| 1 | Combination | İki wordlist birleştir |
+| 3 | Brute-force | Tüm kombinasyonları dene |
+| 6 | Hybrid | Wordlist + mask |
+| 7 | Hybrid | Mask + wordlist |
+
+**Örnek Kullanım:**
+```bash
+# WPA2 hash kırma
+hashcat -m 22000 -a 0 handshake.hc22000 rockyou.txt
+
+# Brute force (8 karakter, sadece rakam)
+hashcat -m 22000 -a 3 handshake.hc22000 ?d?d?d?d?d?d?d?d
+
+# Kırılmış parolayı göster
+hashcat -m 22000 handshake.hc22000 --show
+```
+
+---
+
+#### `hcxpcapngtool` - CAP → Hashcat Format Dönüştürücü
+Yakalanan .cap dosyasını hashcat formatına dönüştürür.
+
+```bash
+hcxpcapngtool [seçenekler] <dosya.cap>
+```
+
+| Parametre | Açıklama | Örnek |
+|-----------|----------|-------|
+| `-o <dosya>` | Çıktı dosyası (.hc22000) | `-o output.hc22000` |
+| `-E <dosya>` | ESSID listesi çıkar | `-E essids.txt` |
+
+**Örnek Kullanım:**
+```bash
+# cap → hc22000 dönüşümü
+hcxpcapngtool -o handshake.hc22000 capture-01.cap
+```
+
+---
+
+#### `crunch` - Wordlist Oluşturucu
+Belirtilen kriterlere göre wordlist oluşturur.
+
+```bash
+crunch <min_uzunluk> <max_uzunluk> [karakterler] [seçenekler]
+```
+
+| Parametre | Açıklama | Örnek |
+|-----------|----------|-------|
+| `-o <dosya>` | Çıktı dosyası | `-o wordlist.txt` |
+| `-t <pattern>` | Pattern belirt | `-t @@@@1234` |
+| `-c <sayı>` | Satır sayısı limiti | `-c 1000000` |
+
+**Özel Karakterler (@, %, ^):**
+| Karakter | Anlam |
+|----------|-------|
+| `@` | Küçük harf (a-z) |
+| `,` | Büyük harf (A-Z) |
+| `%` | Sayı (0-9) |
+| `^` | Özel karakter |
+
+**Örnek Kullanım:**
+```bash
+# 8 haneli sadece sayılar
+crunch 8 8 0123456789 -o numbers.txt
+
+# 6-8 karakter, küçük harf + sayı
+crunch 6 8 abcdefghijklmnopqrstuvwxyz0123456789 -o mixed.txt
+
+# Pattern: 4 harf + 4 sayı
+crunch 8 8 -t @@@@%%%% -o pattern.txt
+```
+
+---
+
+### 🖥️ Linux Sistem Komutları
+
+#### `iwconfig` - Wireless Interface Yapılandırma
+Kablosuz ağ arayüzlerini görüntüler ve yapılandırır.
+
+```bash
+iwconfig [interface] [parametre değer]
+```
+
+**Örnek Çıktı:**
+```
+wlan0     IEEE 802.11  Mode:Managed  Frequency:2.437 GHz  
+          Access Point: AA:BB:CC:DD:EE:FF   
+          Bit Rate=54 Mb/s   Tx-Power=20 dBm   
+          Link Quality=70/70  Signal level=-40 dBm
+```
+
+| Alan | Açıklama |
+|------|----------|
+| `Mode` | Managed (normal) veya Monitor |
+| `Frequency` | Çalışma frekansı |
+| `Access Point` | Bağlı olduğu AP |
+| `Signal level` | Sinyal gücü (dBm) |
+
+**Örnek Kullanım:**
+```bash
+# Tüm wireless interface'leri göster
+iwconfig
+
+# Belirli interface bilgisi
+iwconfig wlan0
+
+# Kanal değiştir (monitor modda)
+iwconfig wlan0mon channel 6
+```
+
+---
+
+#### `pkill` - Process Sonlandırma
+İsme göre process sonlandırır.
+
+```bash
+pkill [seçenekler] <pattern>
+```
+
+| Parametre | Açıklama |
+|-----------|----------|
+| `-9` | SIGKILL (zorla sonlandır) |
+| `-15` | SIGTERM (nazikçe sonlandır) |
+| `-f` | Tam komut satırında ara |
+| `-u <user>` | Belirli kullanıcının process'leri |
+
+**Sinyal Türleri:**
+| Sinyal | Numara | Davranış |
+|--------|--------|----------|
+| SIGTERM | 15 | Temiz kapanma iste |
+| SIGKILL | 9 | Anında zorla kapat |
+| SIGHUP | 1 | Yeniden yükle |
+
+**Örnek Kullanım:**
+```bash
+# Zorla sonlandır
+pkill -9 airodump-ng
+
+# İsme göre sonlandır
+pkill -f "airodump-ng wlan0mon"
+
+# Tüm kullanıcının process'leri
+pkill -u root airodump-ng
+```
+
+---
+
+#### `systemctl` - Servis Yönetimi
+Linux sistemd servislerini yönetir.
+
+```bash
+systemctl <komut> <servis>
+```
+
+| Komut | Açıklama |
+|-------|----------|
+| `start` | Servisi başlat |
+| `stop` | Servisi durdur |
+| `restart` | Servisi yeniden başlat |
+| `status` | Servis durumu |
+| `enable` | Açılışta otomatik başlat |
+| `disable` | Açılışta başlatma |
+
+**Örnek Kullanım:**
+```bash
+# NetworkManager'ı yeniden başlat
+systemctl restart NetworkManager
+
+# NetworkManager durumu
+systemctl status NetworkManager
+
+# Servisi durdur
+systemctl stop wpa_supplicant
+```
+
+---
+
+#### `timeout` - Zaman Sınırlı Komut Çalıştırma
+Komutu belirtilen süre sonra otomatik durdurur.
+
+```bash
+timeout <süre> <komut>
+```
+
+| Süre Formatı | Örnek |
+|--------------|-------|
+| Saniye | `30` |
+| Dakika | `5m` |
+| Saat | `1h` |
+
+**Örnek Kullanım:**
+```bash
+# 30 saniye sonra durdur
+timeout 30 airodump-ng wlan0mon
+
+# 5 dakika sonra durdur
+timeout 5m ping google.com
+```
+
+---
+
+### 📂 Dosya ve Metin İşleme Komutları
+
+#### `grep` - Metin Arama
+Dosyalarda veya çıktılarda pattern arar.
+
+```bash
+grep [seçenekler] <pattern> [dosya]
+```
+
+| Parametre | Açıklama |
+|-----------|----------|
+| `-i` | Büyük/küçük harf duyarsız |
+| `-v` | Eşleşmeyenleri göster |
+| `-q` | Sessiz mod (sadece exit code) |
+| `-r` | Recursive (alt klasörler) |
+| `-E` | Extended regex |
+
+**Örnek Kullanım:**
+```bash
+# WPA2 içeren satırlar
+grep -i "WPA2" scan.csv
+
+# "no wireless" içermeyen satırlar
+grep -v "no wireless" output.txt
+
+# Sessiz kontrol (if içinde kullanım)
+if grep -q "handshake" output.txt; then
+    echo "Bulundu!"
+fi
+```
+
+---
+
+#### `awk` - Metin İşleme
+Sütun bazlı metin işleme aracı.
+
+```bash
+awk '{print $N}' <dosya>
+```
+
+| Değişken | Anlam |
+|----------|-------|
+| `$0` | Tüm satır |
+| `$1, $2...` | 1., 2. sütun |
+| `$NF` | Son sütun |
+| `NR` | Satır numarası |
+
+**Örnek Kullanım:**
+```bash
+# 4. sütunu yazdır
+awk '{print $4}' output.txt
+
+# 1. ve 3. sütun
+awk '{print $1, $3}' file.csv
+
+# : ile ayrılmış 2. alan
+awk -F':' '{print $2}' file.txt
+```
+
+---
+
+#### `cut` - Metin Kesme
+Belirli karakter veya alan aralığını keser.
+
+```bash
+cut [seçenekler] <dosya>
+```
+
+| Parametre | Açıklama |
+|-----------|----------|
+| `-d` | Ayırıcı karakter |
+| `-f` | Alan numarası |
+| `-c` | Karakter pozisyonu |
+
+**Örnek Kullanım:**
+```bash
+# : ile ayrılmış 2. alan
+cut -d':' -f2 file.txt
+
+# 1-10 karakterler
+cut -c1-10 file.txt
+
+# , ile ayrılmış 1. ve 3. alan
+cut -d',' -f1,3 file.csv
+```
+
+---
+
+#### `rm` - Dosya Silme
+Dosya ve klasörleri siler.
+
+```bash
+rm [seçenekler] <dosya/klasör>
+```
+
+| Parametre | Açıklama |
+|-----------|----------|
+| `-f` | Zorla sil (onay sorma) |
+| `-r` | Recursive (klasörle birlikte) |
+| `-i` | Her dosya için onay iste |
+
+**Örnek Kullanım:**
+```bash
+# Tek dosya sil
+rm file.txt
+
+# Zorla sil
+rm -f /tmp/wpa2hunter_*.conf
+
+# Klasör ve içeriğini sil
+rm -rf /tmp/cache/
+```
+
+---
+
+#### `cat` - Dosya İçeriği Görüntüleme
+Dosya içeriğini ekrana yazar.
+
+```bash
+cat [dosya]
+```
+
+**Örnek Kullanım:**
+```bash
+# Dosya içeriğini göster
+cat /tmp/wpa2hunter_interface.conf
+
+# Değişkene ata
+INTERFACE=$(cat /tmp/config.txt)
+```
+
+---
+
+#### `gunzip` - GZIP Sıkıştırma Açma
+.gz uzantılı dosyaları açar.
+
+```bash
+gunzip <dosya.gz>
+```
+
+**Örnek Kullanım:**
+```bash
+# rockyou.txt.gz → rockyou.txt
+gunzip /usr/share/wordlists/rockyou.txt.gz
+```
+
+---
+
+#### `wc` - Kelime/Satır Sayma
+Dosyadaki satır, kelime, karakter sayısını verir.
+
+```bash
+wc [seçenekler] <dosya>
+```
+
+| Parametre | Açıklama |
+|-----------|----------|
+| `-l` | Satır sayısı |
+| `-w` | Kelime sayısı |
+| `-c` | Byte sayısı |
+
+**Örnek Kullanım:**
+```bash
+# Satır sayısı
+wc -l rockyou.txt
+# Çıktı: 14344391 rockyou.txt
+
+# Değişkene ata
+COUNT=$(wc -l < wordlist.txt)
+```
+
+---
+
+#### `ls` - Dizin Listeleme
+Klasör içeriğini listeler.
+
+```bash
+ls [seçenekler] [dizin]
+```
+
+| Parametre | Açıklama |
+|-----------|----------|
+| `-l` | Detaylı liste |
+| `-h` | İnsan okunabilir boyut |
+| `-a` | Gizli dosyalar dahil |
+
+**Örnek Kullanım:**
+```bash
+# Detaylı liste
+ls -lh captures/
+
+# .cap dosyalarını listele
+ls -lh captures/*.cap
+```
+
+---
+
+#### `mkdir` - Klasör Oluşturma
+Yeni klasör oluşturur.
+
+```bash
+mkdir [seçenekler] <klasör>
+```
+
+| Parametre | Açıklama |
+|-----------|----------|
+| `-p` | Üst klasörleri de oluştur |
+
+**Örnek Kullanım:**
+```bash
+# Klasör oluştur
+mkdir captures
+
+# Nested klasör oluştur
+mkdir -p /path/to/deep/folder
+```
+
+---
+
+### 🔀 Bash Script Yapıları
+
+#### `$EUID` - Effective User ID
+Scriptin çalıştığı kullanıcının ID'si.
+
+```bash
+if [ "$EUID" -ne 0 ]; then
+    echo "Root yetkisi gerekli!"
+    exit 1
+fi
+```
+
+| Değer | Kullanıcı |
+|-------|-----------|
+| 0 | root |
+| 1000+ | Normal kullanıcı |
+
+---
+
+#### `set -e` - Hata Durumunda Dur
+Herhangi bir komut hata verirse script durur.
+
+```bash
+set -e  # Aktifleştir
+set +e  # Deaktifleştir
+```
+
+---
+
+#### `read` - Kullanıcı Girdisi
+Kullanıcıdan input alır.
+
+```bash
+read [seçenekler] <değişken>
+```
+
+| Parametre | Açıklama |
+|-----------|----------|
+| `-p "mesaj"` | Prompt mesajı |
+| `-s` | Sessiz mod (şifre için) |
+| `-t <saniye>` | Timeout |
+
+**Örnek Kullanım:**
+```bash
+read -p "Interface adı: " INTERFACE
+read -s -p "Şifre: " PASSWORD
+```
+
+---
+
+#### `2>/dev/null` - Hata Çıktısını Gizle
+Stderr'i /dev/null'a yönlendirir.
+
+```bash
+komut 2>/dev/null        # Sadece stderr'i gizle
+komut >/dev/null 2>&1    # Hem stdout hem stderr'i gizle
+komut &>/dev/null        # Kısa yazım (her ikisi)
+```
+
+---
+
+#### `|| true` - Hata Durumunda Devam Et
+Komut hata verse bile script devam eder.
+
+```bash
+pkill -9 process 2>/dev/null || true
+```
+
+---
+
+#### `$!` - Son Arka Plan Process ID
+Son arka planda başlatılan komutun PID'si.
+
+```bash
+airodump-ng wlan0mon &
+SCAN_PID=$!
+echo "PID: $SCAN_PID"
+```
+
+---
+
+#### `kill -0` - Process Var mı Kontrolü
+Process'in çalışıp çalışmadığını kontrol eder.
+
+```bash
+if kill -0 $PID 2>/dev/null; then
+    echo "Process çalışıyor"
+else
+    echo "Process yok"
+fi
+```
+
+---
+
+## �🔄 Genel İş Akışı
 
 ```
 ┌──────────────────┐
